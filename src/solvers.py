@@ -7,7 +7,7 @@ import dataclasses
 from typing import List
 import torch
 
-sys.path.append("..")
+
 from helpers import make_regularized_pca_loss, SVD_initialization
 
 

@@ -13,6 +13,9 @@ from src.glrm import GLRM
 
 
 def run_unsupervised_experiment(dataset: np.ndarray, name: str):
+    """ Sweeps over a range of ranks and a range of values for lambda, 
+    runs PCA, Sparse PCA and NMF on dataset. 
+    Writes results to csv"""
 
     n, m = dataset.shape
 
@@ -63,6 +66,7 @@ def make_synthetic_data(
     rank: int,
     non_negative: bool = False,
 ) -> np.ndarray:
+    """As described in section 7.5, synthetic dataset is created and tested with PCA, Sparse PCA and NMF"""
 
     # Make some synthetic data that has a low-rank factorisation.
     X_true = np.random.randn(num_data, rank)

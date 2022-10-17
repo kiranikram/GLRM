@@ -4,7 +4,7 @@ import pandas as pd
 import numpy as np
 import torch
 
-sys.path.append("..")
+
 from src.glrm import GLRM
 from sklearn.metrics import r2_score
 from sklearn.model_selection import train_test_split
@@ -37,8 +37,8 @@ def test_sklearn_regr(data):
     return y_pred, btest
 
 
-def supervised_experiment():
-    data = pd.read_csv("/Users/ikram/Desktop/GLRM/data/housing.csv").to_numpy()
+def supervised_experiment(path):
+    data = pd.read_csv(path).to_numpy()
     glrm = GLRM(max_iterations=2000, seed=1, lambd=0)
 
     algs = {
@@ -64,15 +64,4 @@ def supervised_experiment():
         df.to_csv(f)
 
 
-supervised_experiment()
 
-
-def plotGraph(y_test, y_pred, regressorName):
-    if max(y_test) >= max(y_pred):
-        my_range = int(max(y_test))
-    else:
-        my_range = int(max(y_pred))
-    plt.scatter(range(len(y_test)), y_test, color="blue")
-    plt.scatter(range(len(y_pred)), y_pred, color="red")
-    plt.title(regressorName)
-    plt.show()
