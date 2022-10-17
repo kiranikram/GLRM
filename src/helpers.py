@@ -1,22 +1,18 @@
 import numpy as np
-import cvxpy as cp
-import os
-import sys
 import torch
 import math
 
-sys.path.append(os.path.dirname(os.path.dirname(__file__)))
-
 
 def make_regularized_pca_loss(lambd: float, *, norm: int = 2):
-    """_summary_
+    """Sets up the objective function
 
     Args:
-        lambd (float): _description_
+        lambd (float): shrinkage penalty for regularization
         norm (int, optional): Shrinkage penalty:Lasso = 1, Ridge = 2. Defaults to 2.
     """
 
     def loss(X, Y, A):
+        """squared frobenius norm loss funnction."""
 
         n, m = A.shape
         n_x, k = X.shape
