@@ -6,10 +6,10 @@ This repo implements components from "Generalized Low Rank Models" (https://web.
 
 To test the low rank models two datsets were utilized (1) the multivariate Statlog Dataset (https://archive.ics.uci.edu/ml/datasets/Statlog+%28Heart%29) which comprises 14 features and (2) Default of Credit Card Clients Dataset (https://archive.ics.uci.edu/ml/datasets/default+of+credit+card+clients) which comprises 24 features for analysis. 
 
-# Usage
-
-The experiments.py folder in src can be used to run the low rank models, which can be found in glrm.py
-
 # Analyis
 
 Plots of ranks as well as shrinkage hyperparameters can be found in the analysis notebook. 
+
+# Usage
+
+The user should specify a dataset and supervised vs unsupervised to call learn from GLRM. glrm.py contains the class GLRM. The experiments folders were used to conduct the experiments as described in analysis.py
