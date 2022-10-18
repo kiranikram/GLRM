@@ -13,3 +13,10 @@ Plots of ranks as well as shrinkage hyperparameters can be found in the analysis
 # Usage
 
 The user should specify a dataset and supervised vs unsupervised to call learn from GLRM. glrm.py contains the class GLRM. The experiments folders were used to conduct the experiments as described in analysis.py
+
+
+# Future Work
+
+- Adding efficiency to the optimizers (1) parallelization (2) inner iterations for X and Y updates
+
+- Loss functions for abstract data types
