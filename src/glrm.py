@@ -11,7 +11,7 @@ from sklearn.model_selection import train_test_split
 sys.path.append("..")
 
 from .solvers import alternating_optimizer, nmf_alt_minimizer
-from .helpers import make_regularized_pca_loss
+from .helpers import make_regularized_pca_loss_X , make_regularized_pca_loss_Y
 
 
 class GLRM:
@@ -47,9 +47,12 @@ class GLRM:
             self._preprocess(data),
             rank=rank,
             seed=self.seed,
-            objective=make_regularized_pca_loss(
+            objective_X=make_regularized_pca_loss_X(
                 self.lambd, norm=2
-            ),  # Quadratically-regularised.
+            ),  
+            objective_Y=make_regularized_pca_loss_Y(
+                self.lambd, norm=2
+            ), 
             lr=1e-2,
             max_iterations=self.max_iterations,
             use_svd_init=False,
@@ -63,9 +66,12 @@ class GLRM:
             self._preprocess(data),
             rank=rank,
             seed=self.seed,
-            objective=make_regularized_pca_loss(
+            objective_X=make_regularized_pca_loss_X(
                 self.lambd, norm=1
             ),  # Quadratically loss regularised with l1 norm for sparsity
+            objective_Y=make_regularized_pca_loss_Y(
+                self.lambd, norm=2
+            ),
             lr=1e-2,
             max_iterations=self.max_iterations,
             use_svd_init=False,
@@ -80,8 +86,8 @@ class GLRM:
             self._preprocess(data),
             rank=rank,
             seed=self.seed,
-            objective=make_regularized_pca_loss(self.lambd, norm=2),
             lr=1e-2,
+            lambd = self.lambd,
             max_iterations=self.max_iterations,
             use_svd_init=False,
         )

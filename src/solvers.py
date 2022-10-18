@@ -8,7 +8,8 @@ from typing import List
 import torch
 
 
-from helpers import make_regularized_pca_loss, SVD_initialization
+sys.path.append("..")
+from helpers import make_regularized_pca_loss_X, make_regularized_pca_loss_Y, SVD_initialization
 
 
 EARLY_STOPPING_TOL = 1e-5
@@ -27,8 +28,8 @@ def nmf_alt_minimizer(
     *,
     rank: int,
     seed: int,
-    objective,
     lr: float = 1e-2,
+    lambd: float,
     max_iterations: int = 1_000,
     use_svd_init: bool = False,
 ) -> Result:
@@ -50,7 +51,7 @@ def nmf_alt_minimizer(
 
         # copy the values into Y_ from Y
         Y_.copy_(Y)
-        loss_X = torch.norm(A - X @ Y_) ** 2 / (n * m)
+        loss_X = (torch.norm(A - X @ Y_) ** 2 + lambd * torch.norm(X, 2) ** 2 / (n * rank))
 
         opt_X.zero_grad()
         loss_X.backward()
@@ -64,7 +65,7 @@ def nmf_alt_minimizer(
 
         # copy the values into X_ from X
         X_.copy_(X)
-        loss_Y = torch.norm(A - X_ @ Y) ** 2 / (n * m)
+        loss_Y = torch.norm(A - X_ @ Y) ** 2  + lambd * torch.norm(Y, 2) ** 2 / (m * rank)
 
         opt_Y.zero_grad()
         loss_Y.backward()
@@ -101,7 +102,8 @@ def alternating_optimizer(
     *,
     rank: int,
     seed: int,
-    objective,
+    objective_X,
+    objective_Y,
     lr: float = 1e-2,
     max_iterations: int = 1_000,
     use_svd_init: bool = False,
@@ -136,16 +138,19 @@ def alternating_optimizer(
             X.requires_grad = False
             Y.requires_grad = True
 
-        loss = objective(X, Y, A)
+        loss_X = objective_X(X, Y, A)
+        loss_Y = objective_Y(X, Y, A)
 
         if iteration % 2 == 0:
             optimizer_x.zero_grad()
-            loss.backward()
+            loss_X.backward()
             optimizer_x.step()
+            loss = loss_X
         else:
             optimizer_y.zero_grad()
-            loss.backward()
+            loss_Y.backward()
             optimizer_y.step()
+            loss = loss_Y
 
         current_loss = loss.detach().numpy().item()
         if np.abs(current_loss - prev_loss) < EARLY_STOPPING_TOL:
