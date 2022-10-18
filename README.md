@@ -20,3 +20,7 @@ The user should specify a dataset and supervised vs unsupervised to call learn f
 - Adding efficiency to the optimizers (1) parallelization (2) inner iterations for X and Y updates
 
 - Loss functions for abstract data types
+
+- Interpretability for each new archetype
+
+
