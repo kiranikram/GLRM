@@ -23,4 +23,8 @@ The user should specify a dataset and supervised vs unsupervised to call learn f
 
 - Interpretability for each new archetype
 
+- Other forms of optimization 
+
+- Larger heterogenuous dataset
+
 
