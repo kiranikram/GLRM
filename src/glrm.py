@@ -70,7 +70,7 @@ class GLRM:
                 self.lambd, norm=1
             ),  # Quadratically loss regularised with l1 norm for sparsity
             objective_Y=make_regularized_pca_loss_Y(
-                self.lambd, norm=2
+                self.lambd, norm=1
             ),
             lr=1e-2,
             max_iterations=self.max_iterations,
