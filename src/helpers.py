@@ -4,7 +4,6 @@ import math
 
 import sys
 
-sys.path.append("..")
 
 def make_regularized_pca_loss_X(lambd: float, *, norm: int = 2):
     """Sets up the objective function

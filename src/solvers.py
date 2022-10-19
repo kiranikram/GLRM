@@ -8,7 +8,6 @@ from typing import List
 import torch
 
 
-sys.path.append("..")
 from helpers import make_regularized_pca_loss_X, make_regularized_pca_loss_Y, SVD_initialization
 
 

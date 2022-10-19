@@ -8,7 +8,7 @@ import torch
 from typing import Callable, List, Optional
 from sklearn.model_selection import train_test_split
 
-sys.path.append("..")
+
 
 from .solvers import alternating_optimizer, nmf_alt_minimizer
 from .helpers import make_regularized_pca_loss_X , make_regularized_pca_loss_Y

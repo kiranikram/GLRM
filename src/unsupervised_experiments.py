@@ -7,7 +7,6 @@ from typing import List
 
 import numpy as np
 
-sys.path.append("..")
 
 from src.glrm import GLRM
 
