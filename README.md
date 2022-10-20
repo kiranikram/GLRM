@@ -27,4 +27,6 @@ The user should specify a dataset and supervised vs unsupervised to call learn f
 
 - Larger heterogenuous dataset
 
+- Implicit offset/scaling in loss functions for non-savvy users
+
 

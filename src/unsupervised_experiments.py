@@ -55,7 +55,7 @@ def run_unsupervised_experiment(dataset: np.ndarray, name: str):
 
     results_df = pd.DataFrame(results)
 
-    with open(f"../results/reg/results-{name}.csv", "w") as f:
+    with open(f"../results/nostd/results-{name}.csv", "w") as f:
         results_df.to_csv(f)
 
 
@@ -77,5 +77,5 @@ def make_synthetic_data(
 
     return X_true @ Y_true
 
-df = pd.read_csv("/Users/ikram/Desktop/GLRM/data/statlog.csv")
-run_unsupervised_experiment(df.values, 'statlog')
+df = make_synthetic_data(200, 200, 2)
+run_unsupervised_experiment(df.values, 'synthetic')
