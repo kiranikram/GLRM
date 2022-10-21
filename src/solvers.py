@@ -7,11 +7,18 @@ import dataclasses
 from typing import List
 import torch
 
+sys.path.append("..")
 
-from helpers import make_regularized_pca_loss_X, make_regularized_pca_loss_Y, SVD_initialization
+
+from helpers import (
+    make_regularized_pca_loss_X,
+    make_regularized_pca_loss_Y,
+    SVD_initialization,
+    get_matrix_norm,
+)
 
 
-EARLY_STOPPING_TOL = 1e-5
+EARLY_STOPPING_TOL = 1e-4
 
 
 @dataclasses.dataclass
@@ -27,7 +34,7 @@ def nmf_alt_minimizer(
     *,
     rank: int,
     seed: int,
-    lr: float = 1e-2,
+    lr: float = 1e-3,
     lambd: float,
     max_iterations: int = 1_000,
     use_svd_init: bool = False,
@@ -41,8 +48,8 @@ def nmf_alt_minimizer(
     Y_ = torch.rand(rank, m)
     X_ = torch.rand(n, rank)
 
-    opt_X = torch.optim.SGD([X], lr=lr)
-    opt_Y = torch.optim.SGD([Y], lr=lr)
+    opt_X = torch.optim.Adam([X], lr=lr)
+    opt_Y = torch.optim.Adam([Y], lr=lr)
 
     all_metrics = []
     prev_loss = np.inf
@@ -50,7 +57,9 @@ def nmf_alt_minimizer(
 
         # copy the values into Y_ from Y
         Y_.copy_(Y)
-        loss_X = (torch.norm(A - X @ Y_) ** 2 + lambd * torch.norm(X, 2) ** 2 / (n * rank))
+        mse = torch.norm(A - X @ Y_) ** 2 / (n * m)
+        regularizer = torch.linalg.matrix_norm(X, ord=2) / (n * rank)
+        loss_X = mse + lambd * regularizer
 
         opt_X.zero_grad()
         loss_X.backward()
@@ -64,7 +73,9 @@ def nmf_alt_minimizer(
 
         # copy the values into X_ from X
         X_.copy_(X)
-        loss_Y = torch.norm(A - X_ @ Y) ** 2  + lambd * torch.norm(Y, 2) ** 2 / (m * rank)
+        mse = torch.norm(A - X_ @ Y) ** 2 / (n * m)
+        regularizer = torch.linalg.matrix_norm(Y, ord=2) / (m * rank)
+        loss_Y = mse + lambd * regularizer
 
         opt_Y.zero_grad()
         loss_Y.backward()
@@ -72,7 +83,9 @@ def nmf_alt_minimizer(
 
         with torch.no_grad():
             Y = Y.clamp_(min=0)
-            assert torch.all(Y >= 0)
+            # assert torch.all(Y >= 0)
+            if not torch.all(Y >= 0):
+                print(Y)
         loss = loss_Y
 
         current_loss = loss.detach().numpy().item()

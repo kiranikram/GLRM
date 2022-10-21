@@ -4,16 +4,17 @@ import sys
 import os
 import dataclasses
 from typing import List
-
 import numpy as np
+
+sys.path.append("..")
 
 
 from src.glrm import GLRM
 
 
 def run_unsupervised_experiment(dataset: np.ndarray, name: str):
-    """ Sweeps over a range of ranks and a range of values for lambda, 
-    runs PCA, Sparse PCA and NMF on dataset. 
+    """Sweeps over a range of ranks and a range of values for lambda,
+    runs PCA, Sparse PCA and NMF on dataset.
     Writes results to csv"""
 
     n, m = dataset.shape
@@ -22,7 +23,7 @@ def run_unsupervised_experiment(dataset: np.ndarray, name: str):
     seed = 1
     fracs = [0.01, 0.1, 0.5, 1.0]
     for lambd in [0.0, 0.3, 1.0]:
-        my_glrm = GLRM(max_iterations=2000, seed=seed, lambd=lambd)
+        my_glrm = GLRM(max_iterations=2_000, seed=seed, lambd=lambd)
         models = {
             "pca": my_glrm.pca,
             "sparse_pca": my_glrm.sparse_PCA,
@@ -77,5 +78,6 @@ def make_synthetic_data(
 
     return X_true @ Y_true
 
-df = make_synthetic_data(200, 200, 2)
-run_unsupervised_experiment(df.values, 'synthetic')
+
+df = make_synthetic_data(200, 200, 2, non_negative=False)
+run_unsupervised_experiment(df, "synthetic")

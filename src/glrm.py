@@ -2,6 +2,7 @@ import numpy as np
 import cvxpy as cp
 import sys
 import os
+sys.path.append("..")
 
 import pandas as pd
 import torch
@@ -83,10 +84,11 @@ class GLRM:
     def nmf(self, data: np.ndarray, rank: int):
         """Non-negative matrix factorization."""
         result = nmf_alt_minimizer(
-            self._preprocess(data),
+            #self._preprocess(data),
+            data,
             rank=rank,
             seed=self.seed,
-            lr=1e-2,
+            lr=1e-3,
             lambd = self.lambd,
             max_iterations=self.max_iterations,
             use_svd_init=False,

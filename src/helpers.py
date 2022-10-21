@@ -77,7 +77,7 @@ def SVD_initialization(A, rank):
     return X_init, Y_init
 
 
-def get_matrix_norm(matrix: tensor, norm: int, use_torch: bool = True):
+def get_matrix_norm(matrix: torch.tensor, norm: int, use_torch: bool = True):
     """Returns norm for matrix as defined by user.
         norm of a vector is "the size or length of a vector is a
         nonnegative number that describes the extent of the vector
