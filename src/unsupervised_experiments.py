@@ -17,10 +17,10 @@ def run_unsupervised_experiment(dataset: np.ndarray, name: str):
 
     results = []
     seed = 1
-    fracs = [0.01, 0.1, 0.5, 1.0]
-    for lambd in [0.0, 3, 10, 30, 100]:
+    rank_fracs = [0.01, 0.1, 0.5, 1.0]
+    for lambd in [0.0, 1, 3, 10]:
         my_glrm = GLRM(
-            max_iterations=3_000,
+            max_iterations=2_000,
             seed=seed,
             lambd=lambd,
         )
@@ -30,7 +30,7 @@ def run_unsupervised_experiment(dataset: np.ndarray, name: str):
             "nmf": my_glrm.nmf,
         }
         for model_name, model in models.items():
-            for frac in fracs:
+            for frac in rank_fracs:
                 rank = max(int(frac * m), 1)
                 print(
                     f"Running GLRM for model={model_name}, rank={rank}, lambda={lambd}"
@@ -76,14 +76,14 @@ def make_synthetic_data(
     return X_true @ Y_true
 
 
-# df = np.abs(pd.read_csv("/Users/ikram/Desktop/GLRM/data/credit_card.csv"))
+# df = pd.read_csv("/Users/ikram/Desktop/GLRM/data/credit_card.csv").sample(frac=0.01)
 # run_unsupervised_experiment(df.values, "credit_card")
 
 # df = pd.read_csv("/Users/ikram/Desktop/GLRM/data/statlog.csv")
 # run_unsupervised_experiment(df.values, "statlog")
 
 # data = make_synthetic_data(200, 200, rank=2, non_negative=False)
-# run_unsupervised_experiment(data, "synthetic")
+# run_unsupervised_experiment(data, "synthetic_regular")
 
 data = make_synthetic_data(200, 200, rank=2, non_negative=True)
-run_unsupervised_experiment(data, "synthetic-nonnegative")
+run_unsupervised_experiment(data, "synthetic_nonnegative")
