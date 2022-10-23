@@ -1,17 +1,15 @@
-import numpy as np
-import cvxpy as cp
 import sys
-import os
 
 sys.path.append("..")
 
+import numpy as np
 import pandas as pd
 import torch
-from typing import Callable, List, Optional
+from typing import Optional
 from sklearn.model_selection import train_test_split
 
 
-from .solvers import alternating_optimizer, nmf_alt_minimizer
+from .solvers import Result, alternating_optimizer, nmf_alt_minimizer
 from .helpers import make_regularized_pca_loss
 
 
@@ -37,12 +35,14 @@ class GLRM:
     def _preprocess(self, data: np.ndarray):
         self.offset = np.mean(data, axis=0)
         self.scale = np.std(data, axis=0)
+        # Handle columns with zero variance.
+        self.scale = np.where(self.scale == 0, np.ones_like(self.scale), self.scale)
         return (data - self.offset) / self.scale
 
     def _postprocess(self, data: np.ndarray):
         return data
 
-    def pca(self, data: np.ndarray, rank: int):
+    def pca(self, data: np.ndarray, rank: int) -> Result:
         """Runs quadratically-regularized PCA on data."""
         result = alternating_optimizer(
             self._preprocess(data),
@@ -56,7 +56,7 @@ class GLRM:
         result.X = self._postprocess(result.X)
         return result
 
-    def sparse_PCA(self, data: np.ndarray, rank: int):
+    def sparse_PCA(self, data: np.ndarray, rank: int) -> Result:
         """Runs sparsity-regularized PCA on data."""
         result = alternating_optimizer(
             self._preprocess(data),
@@ -73,7 +73,7 @@ class GLRM:
         result.X = self._postprocess(result.X)
         return result
 
-    def nmf(self, data: np.ndarray, rank: int):
+    def nmf(self, data: np.ndarray, rank: int) -> Result:
         """Non-negative matrix factorization."""
         result = nmf_alt_minimizer(
             data,  # No preprocessing.

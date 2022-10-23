@@ -1,20 +1,10 @@
-import pdb
-import functools
-import numpy as np
-import sys
-import os
 import dataclasses
-from typing import List
+
+import numpy as np
 import torch
 
-sys.path.append("..")
 
-
-from helpers import (
-    make_regularized_pca_loss,
-    SVD_initialization,
-    get_matrix_norm,
-)
+from helpers import SVD_initialization
 
 
 EARLY_STOPPING_TOL = 1e-8
@@ -42,10 +32,11 @@ def nmf_alt_minimizer(
     A = torch.tensor(A, dtype=torch.float)
     n, m = A.shape
 
+    torch.manual_seed(seed)
     X = torch.rand((n, rank), requires_grad=True)
     Y = torch.rand((rank, m), requires_grad=True)
-    Y_ = torch.rand(rank, m)
-    X_ = torch.rand(n, rank)
+    X_ = torch.zeros_like(X)
+    Y_ = torch.zeros_like(Y)
 
     opt_X = torch.optim.Adam([X], lr=lr)
     opt_Y = torch.optim.Adam([Y], lr=lr)
@@ -56,9 +47,9 @@ def nmf_alt_minimizer(
 
         # copy the values into Y_ from Y
         Y_.copy_(Y)
-        mse = torch.norm(A - X @ Y_) ** 2 / (n * m)
+        frob_norm = torch.norm(A - X @ Y_) ** 2 / (n * m)
         regularizer = torch.linalg.matrix_norm(X, ord=2) / (n * rank)
-        loss_X = mse + lambd * regularizer
+        loss_X = frob_norm + lambd * regularizer
 
         opt_X.zero_grad()
         loss_X.backward()
@@ -72,9 +63,9 @@ def nmf_alt_minimizer(
 
         # copy the values into X_ from X
         X_.copy_(X)
-        mse = torch.norm(A - X_ @ Y) ** 2 / (n * m)
+        frob_norm = torch.norm(A - X_ @ Y) ** 2 / (n * m)
         regularizer = torch.linalg.matrix_norm(Y, ord=2) / (m * rank)
-        loss_Y = mse + lambd * regularizer
+        loss_Y = frob_norm + lambd * regularizer
 
         opt_Y.zero_grad()
         loss_Y.backward()
@@ -82,19 +73,17 @@ def nmf_alt_minimizer(
 
         with torch.no_grad():
             Y = Y.clamp_(min=0)
-            # assert torch.all(Y >= 0)
-            if not torch.all(Y >= 0):
-                print(Y)
+            assert torch.all(Y >= 0)
         loss = loss_Y
 
         current_loss = loss.detach().numpy().item()
         if np.abs(current_loss - prev_loss) < EARLY_STOPPING_TOL:
-            print("Terminating early.")
+            print(f"Terminating early at iteration {iteration}/{max_iterations}.")
             break
         prev_loss = current_loss
         metrics = {
             "loss": loss.detach().numpy().item(),
-            "mse": mse.detach().numpy().item(),
+            "frob_norm": frob_norm.detach().numpy().item(),
             "iteration": iteration,
         }
         if iteration % 500 == 0:
@@ -127,6 +116,7 @@ def alternating_optimizer(
     if use_svd_init:
         X, Y = SVD_initialization(A, rank)
     else:
+        torch.manual_seed(seed)
         X = torch.rand(
             n,
             rank,
@@ -168,7 +158,7 @@ def alternating_optimizer(
         metrics = {
             "loss": current_loss,
             "iteration": iteration,
-            "mse": (torch.norm(A - X @ Y) ** 2).detach().numpy().item(),
+            "frob_norm": (torch.norm(A - X @ Y) ** 2).detach().numpy().item() / (n * m),
         }
 
         if iteration % 500 == 0:

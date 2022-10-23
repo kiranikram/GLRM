@@ -1,11 +1,6 @@
-import csv
 import pandas as pd
 import sys
-import os
-import dataclasses
-from typing import List
 import numpy as np
-from sklearn import decomposition
 
 sys.path.append("..")
 
@@ -33,12 +28,6 @@ def run_unsupervised_experiment(dataset: np.ndarray, name: str):
             "pca": my_glrm.pca,
             "sparse_pca": my_glrm.sparse_PCA,
             "nmf": my_glrm.nmf,
-            # "sklearn_pca": lambda x: decomposition.PCA(n_components=rank)
-            # .fit(x)
-            # .reconstruction_err_,
-            # "sklearn_nmf": lambda x: decomposition.NMF(n_components=rank)
-            # .fit(x)
-            # .reconstruction_err_,
         }
         for model_name, model in models.items():
             for frac in fracs:
@@ -47,15 +36,10 @@ def run_unsupervised_experiment(dataset: np.ndarray, name: str):
                     f"Running GLRM for model={model_name}, rank={rank}, lambda={lambd}"
                 )
                 result = model(dataset, rank=rank)
-                # Note: assuming numerical PCA.
-                reconstruction_loss = np.linalg.norm(
-                    dataset - result.X @ result.Y, ord="fro"
-                ) ** 2 / (n * m)
                 for metrics in result.metrics:
                     results.append(
                         {
                             **metrics,
-                            "reconstruction_loss": reconstruction_loss,
                             "model": model_name,
                             "rank": rank,
                             "dim_reduction_fraction": 1 - frac,
@@ -69,7 +53,7 @@ def run_unsupervised_experiment(dataset: np.ndarray, name: str):
 
     results_df = pd.DataFrame(results)
 
-    with open(f"../results/new/results-{name}.csv", "w") as f:
+    with open(f"../results/results-{name}.csv", "w") as f:
         results_df.to_csv(f)
 
 
@@ -92,8 +76,8 @@ def make_synthetic_data(
     return X_true @ Y_true
 
 
-df = np.abs(pd.read_csv("/Users/ikram/Desktop/GLRM/data/credit_card.csv"))
-run_unsupervised_experiment(df.values, "credit_card")
+# df = np.abs(pd.read_csv("/Users/ikram/Desktop/GLRM/data/credit_card.csv"))
+# run_unsupervised_experiment(df.values, "credit_card")
 
 # df = pd.read_csv("/Users/ikram/Desktop/GLRM/data/statlog.csv")
 # run_unsupervised_experiment(df.values, "statlog")
@@ -101,5 +85,5 @@ run_unsupervised_experiment(df.values, "credit_card")
 # data = make_synthetic_data(200, 200, rank=2, non_negative=False)
 # run_unsupervised_experiment(data, "synthetic")
 
-# data = make_synthetic_data(200, 200, rank=2, non_negative=True)
-# run_unsupervised_experiment(data, "synthetic-nonnegative")
+data = make_synthetic_data(200, 200, rank=2, non_negative=True)
+run_unsupervised_experiment(data, "synthetic-nonnegative")
