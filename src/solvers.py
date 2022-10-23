@@ -11,14 +11,13 @@ sys.path.append("..")
 
 
 from helpers import (
-    make_regularized_pca_loss_X,
-    make_regularized_pca_loss_Y,
+    make_regularized_pca_loss,
     SVD_initialization,
     get_matrix_norm,
 )
 
 
-EARLY_STOPPING_TOL = 1e-4
+EARLY_STOPPING_TOL = 1e-8
 
 
 @dataclasses.dataclass
@@ -95,9 +94,10 @@ def nmf_alt_minimizer(
         prev_loss = current_loss
         metrics = {
             "loss": loss.detach().numpy().item(),
+            "mse": mse.detach().numpy().item(),
             "iteration": iteration,
         }
-        if iteration % 100 == 0:
+        if iteration % 500 == 0:
             print(metrics)
         all_metrics.append(metrics)
 
@@ -114,8 +114,7 @@ def alternating_optimizer(
     *,
     rank: int,
     seed: int,
-    objective_X,
-    objective_Y,
+    objective,
     lr: float = 1e-2,
     max_iterations: int = 1_000,
     use_svd_init: bool = False,
@@ -150,19 +149,16 @@ def alternating_optimizer(
             X.requires_grad = False
             Y.requires_grad = True
 
-        loss_X = objective_X(X, Y, A)
-        loss_Y = objective_Y(X, Y, A)
+        loss = objective(X, Y, A)
 
         if iteration % 2 == 0:
             optimizer_x.zero_grad()
-            loss_X.backward()
+            loss.backward()
             optimizer_x.step()
-            loss = loss_X
         else:
             optimizer_y.zero_grad()
-            loss_Y.backward()
+            loss.backward()
             optimizer_y.step()
-            loss = loss_Y
 
         current_loss = loss.detach().numpy().item()
         if np.abs(current_loss - prev_loss) < EARLY_STOPPING_TOL:
@@ -172,9 +168,10 @@ def alternating_optimizer(
         metrics = {
             "loss": current_loss,
             "iteration": iteration,
+            "mse": (torch.norm(A - X @ Y) ** 2).detach().numpy().item(),
         }
 
-        if iteration % 100 == 0:
+        if iteration % 500 == 0:
             print(metrics)
         all_metrics.append(metrics)
 

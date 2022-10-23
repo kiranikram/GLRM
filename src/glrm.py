@@ -2,6 +2,7 @@ import numpy as np
 import cvxpy as cp
 import sys
 import os
+
 sys.path.append("..")
 
 import pandas as pd
@@ -10,9 +11,8 @@ from typing import Callable, List, Optional
 from sklearn.model_selection import train_test_split
 
 
-
 from .solvers import alternating_optimizer, nmf_alt_minimizer
-from .helpers import make_regularized_pca_loss_X , make_regularized_pca_loss_Y
+from .helpers import make_regularized_pca_loss
 
 
 class GLRM:
@@ -22,7 +22,7 @@ class GLRM:
     - Numerical data only.
     """
 
-    def __init__(self, max_iterations, seed: int, lambd: float):
+    def __init__(self, max_iterations: int, seed: int, lambd: float):
         """Sets up the model.
 
         Args:
@@ -48,12 +48,7 @@ class GLRM:
             self._preprocess(data),
             rank=rank,
             seed=self.seed,
-            objective_X=make_regularized_pca_loss_X(
-                self.lambd, norm=2
-            ),  
-            objective_Y=make_regularized_pca_loss_Y(
-                self.lambd, norm=2
-            ), 
+            objective=make_regularized_pca_loss(self.lambd, norm=2),
             lr=1e-2,
             max_iterations=self.max_iterations,
             use_svd_init=False,
@@ -67,12 +62,9 @@ class GLRM:
             self._preprocess(data),
             rank=rank,
             seed=self.seed,
-            objective_X=make_regularized_pca_loss_X(
+            objective=make_regularized_pca_loss(
                 self.lambd, norm=1
             ),  # Quadratically loss regularised with l1 norm for sparsity
-            objective_Y=make_regularized_pca_loss_Y(
-                self.lambd, norm=1
-            ),
             lr=1e-2,
             max_iterations=self.max_iterations,
             use_svd_init=False,
@@ -84,12 +76,11 @@ class GLRM:
     def nmf(self, data: np.ndarray, rank: int):
         """Non-negative matrix factorization."""
         result = nmf_alt_minimizer(
-            #self._preprocess(data),
-            data,
+            data,  # No preprocessing.
             rank=rank,
             seed=self.seed,
-            lr=1e-3,
-            lambd = self.lambd,
+            lr=1e-2,
+            lambd=self.lambd,
             max_iterations=self.max_iterations,
             use_svd_init=False,
         )

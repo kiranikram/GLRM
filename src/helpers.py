@@ -4,7 +4,7 @@ import math
 import sys
 
 
-def make_regularized_pca_loss_X(lambd: float, *, norm: int = 2):
+def make_regularized_pca_loss(lambd: float, *, norm: int = 2):
     """Sets up the objective function
 
     Args:
@@ -21,33 +21,11 @@ def make_regularized_pca_loss_X(lambd: float, *, norm: int = 2):
         assert n_x == n
         assert m_y == m
 
-        return torch.norm(A - X @ Y) ** 2 / (n * m) + lambd * torch.norm(
-            X, norm
-        ) ** norm / (n * k)
+        mse = torch.norm(A - X @ Y) ** 2 / (n * m)
+        x_regulariser = torch.norm(X, norm) ** norm / (n * k)
+        y_regulariser = torch.norm(Y, norm) ** norm / (m * k)
 
-    return loss
-
-
-def make_regularized_pca_loss_Y(lambd: float, *, norm: int = 2):
-    """Sets up the objective function
-
-    Args:
-        lambd (float): shrinkage penalty for regularization
-        norm (int, optional): Shrinkage penalty:Lasso = 1, Ridge = 2. Defaults to 2.
-    """
-
-    def loss(X, Y, A):
-        """squared frobenius norm loss funnction."""
-
-        n, m = A.shape
-        n_x, k = X.shape
-        k, m_y = Y.shape
-        assert n_x == n
-        assert m_y == m
-
-        return torch.norm(A - X @ Y) ** 2 / (n * m) + lambd * torch.norm(
-            Y, norm
-        ) ** norm / (m * k)
+        return mse + lambd * (x_regulariser + y_regulariser)
 
     return loss
 

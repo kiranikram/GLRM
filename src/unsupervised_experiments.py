@@ -5,6 +5,7 @@ import os
 import dataclasses
 from typing import List
 import numpy as np
+from sklearn import decomposition
 
 sys.path.append("..")
 
@@ -22,17 +23,29 @@ def run_unsupervised_experiment(dataset: np.ndarray, name: str):
     results = []
     seed = 1
     fracs = [0.01, 0.1, 0.5, 1.0]
-    for lambd in [0.0, 0.3, 1.0]:
-        my_glrm = GLRM(max_iterations=2_000, seed=seed, lambd=lambd)
+    for lambd in [0.0, 3, 10, 30, 100]:
+        my_glrm = GLRM(
+            max_iterations=3_000,
+            seed=seed,
+            lambd=lambd,
+        )
         models = {
             "pca": my_glrm.pca,
             "sparse_pca": my_glrm.sparse_PCA,
             "nmf": my_glrm.nmf,
+            # "sklearn_pca": lambda x: decomposition.PCA(n_components=rank)
+            # .fit(x)
+            # .reconstruction_err_,
+            # "sklearn_nmf": lambda x: decomposition.NMF(n_components=rank)
+            # .fit(x)
+            # .reconstruction_err_,
         }
         for model_name, model in models.items():
             for frac in fracs:
                 rank = max(int(frac * m), 1)
-                print(f"Running GLRM for model {model_name} rank: {rank}")
+                print(
+                    f"Running GLRM for model={model_name}, rank={rank}, lambda={lambd}"
+                )
                 result = model(dataset, rank=rank)
                 # Note: assuming numerical PCA.
                 reconstruction_loss = np.linalg.norm(
@@ -56,7 +69,7 @@ def run_unsupervised_experiment(dataset: np.ndarray, name: str):
 
     results_df = pd.DataFrame(results)
 
-    with open(f"../results/nostd/results-{name}.csv", "w") as f:
+    with open(f"../results/new/results-{name}.csv", "w") as f:
         results_df.to_csv(f)
 
 
@@ -79,5 +92,14 @@ def make_synthetic_data(
     return X_true @ Y_true
 
 
-df = make_synthetic_data(200, 200, 2, non_negative=False)
-run_unsupervised_experiment(df, "synthetic")
+df = np.abs(pd.read_csv("/Users/ikram/Desktop/GLRM/data/credit_card.csv"))
+run_unsupervised_experiment(df.values, "credit_card")
+
+# df = pd.read_csv("/Users/ikram/Desktop/GLRM/data/statlog.csv")
+# run_unsupervised_experiment(df.values, "statlog")
+
+# data = make_synthetic_data(200, 200, rank=2, non_negative=False)
+# run_unsupervised_experiment(data, "synthetic")
+
+# data = make_synthetic_data(200, 200, rank=2, non_negative=True)
+# run_unsupervised_experiment(data, "synthetic-nonnegative")
