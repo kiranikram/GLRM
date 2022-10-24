@@ -16,6 +16,7 @@ The user should specify a dataset and supervised vs unsupervised to call learn f
 
 
 # Future Work
+- Apply NMF to more apt dataset, eg image or text
 
 - Adding efficiency to the optimizers (1) parallelization (2) inner iterations for X and Y updates
 
