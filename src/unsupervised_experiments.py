@@ -81,12 +81,16 @@ def make_synthetic_data(
 # normalized_df = normalize(df.values)
 # run_unsupervised_experiment(normalized_df, "credit_card")
 
-df = pd.read_csv("/Users/ikram/Desktop/GLRM/data/statlog.csv")
-normalized_df = normalize(df.values)
-run_unsupervised_experiment(normalized_df, "statlog")
+# df = pd.read_csv("/Users/ikram/Desktop/GLRM/data/statlog.csv")
+# normalized_df = normalize(df.values)
+# run_unsupervised_experiment(normalized_df, "statlog")
 
 # data = make_synthetic_data(200, 200, rank=2, non_negative=False)
 # run_unsupervised_experiment(data, "synthetic_regular")
 
 # data = make_synthetic_data(200, 200, rank=2, non_negative=True)
 # run_unsupervised_experiment(data, "synthetic_nonnegative")
+
+
+#learn
+# GLRM(20, seed=1, lambd=0).learn(normalized_df, rank=3, supervised=False)

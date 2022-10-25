@@ -109,7 +109,7 @@ class GLRM:
     def learn(
         self,
         dataset: np.ndarray,
-        rank: Optional[int] = None,
+        rank: int,
         supervised: bool = True,
     ) -> ...:
         """General learning function.
