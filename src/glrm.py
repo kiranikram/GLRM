@@ -32,20 +32,10 @@ class GLRM:
         self.lambd = lambd
         self.seed = seed
 
-    def _preprocess(self, data: np.ndarray):
-        self.offset = np.mean(data, axis=0)
-        self.scale = np.std(data, axis=0)
-        # Handle columns with zero variance.
-        self.scale = np.where(self.scale == 0, np.ones_like(self.scale), self.scale)
-        return (data - self.offset) / self.scale
-
-    def _postprocess(self, data: np.ndarray):
-        return data
-
     def pca(self, data: np.ndarray, rank: int) -> Result:
         """Runs quadratically-regularized PCA on data."""
-        result = alternating_optimizer(
-            self._preprocess(data),
+        return alternating_optimizer(
+            zero_mean_unit_variance(data),
             rank=rank,
             seed=self.seed,
             objective=make_regularized_pca_loss(self.lambd, norm=2),
@@ -53,13 +43,11 @@ class GLRM:
             max_iterations=self.max_iterations,
             use_svd_init=False,
         )
-        result.X = self._postprocess(result.X)
-        return result
 
     def sparse_PCA(self, data: np.ndarray, rank: int) -> Result:
         """Runs sparsity-regularized PCA on data."""
-        result = alternating_optimizer(
-            self._preprocess(data),
+        return alternating_optimizer(
+            zero_mean_unit_variance(data),
             rank=rank,
             seed=self.seed,
             objective=make_regularized_pca_loss(
@@ -70,13 +58,10 @@ class GLRM:
             use_svd_init=False,
         )
 
-        result.X = self._postprocess(result.X)
-        return result
-
     def nmf(self, data: np.ndarray, rank: int) -> Result:
         """Non-negative matrix factorization."""
-        result = nmf_alt_minimizer(
-            data,  # No preprocessing.
+        return nmf_alt_minimizer(
+            normalize(data),
             rank=rank,
             seed=self.seed,
             lr=1e-2,
@@ -85,15 +70,12 @@ class GLRM:
             use_svd_init=False,
         )
 
-        result.X = self._postprocess(result.X)
-        return result
-
     def simple_linear_regression(self, data: np.ndarray, use_svd: bool = True):
         """Runs simple linear regression on data.
 
         Assumes that the final column of data is the regression target.
         """
-        data = self._preprocess(data)
+        data = zero_mean_unit_variance(data)
 
         # Assume that the final column is the target.
         A = data[:, :-1]
@@ -157,3 +139,19 @@ class GLRM:
                 best_model_idx = idx
 
         return results[best_model_idx]
+
+
+def zero_mean_unit_variance(data: np.ndarray) -> np.ndarray:
+    """Normalizes to zero mean and unit variance."""
+    offset = np.mean(data, axis=0)
+    scale = np.std(data, axis=0)
+    # Handle columns with zero variance.
+    scale = np.where(scale == 0, np.ones_like(scale), scale)
+    return (data - offset) / scale
+
+
+def normalize(data: np.ndarray) -> np.ndarray:
+    """Normalizes to range [0, 1]."""
+    data_min = data.min(axis=0)
+    data_max = data.max(axis=0)
+    return (data - data_min) / (data_max - data_min)

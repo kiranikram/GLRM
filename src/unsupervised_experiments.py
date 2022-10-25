@@ -76,8 +76,8 @@ def make_synthetic_data(
     return X_true @ Y_true
 
 
-# df = pd.read_csv("/Users/ikram/Desktop/GLRM/data/credit_card.csv").sample(frac=0.01)
-# run_unsupervised_experiment(df.values, "credit_card")
+df = pd.read_csv("/Users/ikram/Desktop/GLRM/data/credit_card.csv").sample(frac=0.01)
+run_unsupervised_experiment(df.values, "credit_card")
 
 # df = pd.read_csv("/Users/ikram/Desktop/GLRM/data/statlog.csv")
 # run_unsupervised_experiment(df.values, "statlog")
@@ -85,5 +85,5 @@ def make_synthetic_data(
 # data = make_synthetic_data(200, 200, rank=2, non_negative=False)
 # run_unsupervised_experiment(data, "synthetic_regular")
 
-data = make_synthetic_data(200, 200, rank=2, non_negative=True)
-run_unsupervised_experiment(data, "synthetic_nonnegative")
+# data = make_synthetic_data(200, 200, rank=2, non_negative=True)
+# run_unsupervised_experiment(data, "synthetic_nonnegative")
