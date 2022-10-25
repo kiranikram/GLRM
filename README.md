@@ -6,6 +6,9 @@ This repo implements components from "Generalized Low Rank Models" (https://web.
 
 To test the low rank models two datsets were utilized (1) the multivariate Statlog Dataset (https://archive.ics.uci.edu/ml/datasets/Statlog+%28Heart%29) which comprises 14 features and (2) Default of Credit Card Clients Dataset (https://archive.ics.uci.edu/ml/datasets/default+of+credit+card+clients) which comprises 24 features for analysis. 
 
+Data is available here: 
+https://drive.google.com/drive/folders/1Y1_NC_HSQ88CPiOLiv_DboKyAYWHsCx9?usp=sharing
+
 # Analyis
 
 Plots of ranks as well as shrinkage hyperparameters can be found in the analysis notebook. 
