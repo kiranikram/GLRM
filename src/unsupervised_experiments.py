@@ -6,6 +6,7 @@ sys.path.append("..")
 
 
 from src.glrm import GLRM
+from src.helpers import normalize
 
 
 def run_unsupervised_experiment(dataset: np.ndarray, name: str):
@@ -76,8 +77,9 @@ def make_synthetic_data(
     return X_true @ Y_true
 
 
-df = pd.read_csv("/Users/ikram/Desktop/GLRM/data/credit_card.csv").sample(frac=0.01)
-run_unsupervised_experiment(df.values, "credit_card")
+# df = pd.read_csv("/Users/ikram/Desktop/GLRM/data/credit_card.csv").sample(frac=0.01)
+# normalized_df = normalize(df.values)
+# run_unsupervised_experiment(normalized_df, "credit_card")
 
 # df = pd.read_csv("/Users/ikram/Desktop/GLRM/data/statlog.csv")
 # run_unsupervised_experiment(df.values, "statlog")
@@ -85,5 +87,5 @@ run_unsupervised_experiment(df.values, "credit_card")
 # data = make_synthetic_data(200, 200, rank=2, non_negative=False)
 # run_unsupervised_experiment(data, "synthetic_regular")
 
-# data = make_synthetic_data(200, 200, rank=2, non_negative=True)
-# run_unsupervised_experiment(data, "synthetic_nonnegative")
+data = make_synthetic_data(200, 200, rank=2, non_negative=True)
+run_unsupervised_experiment(data, "synthetic_nonnegative")

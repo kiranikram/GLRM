@@ -10,7 +10,8 @@ from sklearn.model_selection import train_test_split
 
 
 from .solvers import Result, alternating_optimizer, nmf_alt_minimizer
-from .helpers import make_regularized_pca_loss
+from .helpers import make_regularized_pca_loss ,zero_mean_unit_variance
+
 
 
 class GLRM:
@@ -61,7 +62,7 @@ class GLRM:
     def nmf(self, data: np.ndarray, rank: int) -> Result:
         """Non-negative matrix factorization."""
         return nmf_alt_minimizer(
-            normalize(data),
+            data,
             rank=rank,
             seed=self.seed,
             lr=1e-2,
@@ -141,17 +142,3 @@ class GLRM:
         return results[best_model_idx]
 
 
-def zero_mean_unit_variance(data: np.ndarray) -> np.ndarray:
-    """Normalizes to zero mean and unit variance."""
-    offset = np.mean(data, axis=0)
-    scale = np.std(data, axis=0)
-    # Handle columns with zero variance.
-    scale = np.where(scale == 0, np.ones_like(scale), scale)
-    return (data - offset) / scale
-
-
-def normalize(data: np.ndarray) -> np.ndarray:
-    """Normalizes to range [0, 1]."""
-    data_min = data.min(axis=0)
-    data_max = data.max(axis=0)
-    return (data - data_min) / (data_max - data_min)

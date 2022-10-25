@@ -4,6 +4,21 @@ import math
 import numpy as np
 import torch
 
+def zero_mean_unit_variance(data: np.ndarray) -> np.ndarray:
+    """Normalizes to zero mean and unit variance."""
+    offset = np.mean(data, axis=0)
+    scale = np.std(data, axis=0)
+    # Handle columns with zero variance.
+    scale = np.where(scale == 0, np.ones_like(scale), scale)
+    return (data - offset) / scale
+
+
+def normalize(data: np.ndarray) -> np.ndarray:
+    """Normalizes to range [0, 1]."""
+    data_min = data.min(axis=0)
+    data_max = data.max(axis=0)
+    return (data - data_min) / (data_max - data_min)
+
 
 def make_regularized_pca_loss(lambd: float, *, norm: int = 2):
     """Sets up the objective function
